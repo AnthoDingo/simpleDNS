@@ -1,3 +1,7 @@
+# Github
+*.pfx
+SigningCertificate_Encoded.txt
+
 # Windows thumbnail cache files
 Thumbs.db
 Thumbs.db:encryptable

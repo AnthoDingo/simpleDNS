@@ -13,6 +13,7 @@ namespace simpleDNS
             InitializeComponent();
             _zm = new ZoneManager();
             //assistantToolStripMenuItem.Visible = false;
+            preStart();
 
         }
         private void mainForm_Shown(object sender, EventArgs e)

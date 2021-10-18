@@ -10,9 +10,16 @@ namespace simpleDNS
 {
     public partial class frmAssistant : Form
     {
+        private string[] types = new string[2] { "A", "CNAME" };
+
         public frmAssistant()
         {
             InitializeComponent();
+
+            foreach(string type in types)
+            {
+                cbxType.Items.Add(type);
+            }
         }
     }
 }

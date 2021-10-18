@@ -121,9 +121,6 @@ namespace simpleDNS
             // 
             this.cbxType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxType.FormattingEnabled = true;
-            this.cbxType.Items.AddRange(new object[] {
-            "A",
-            "CNAME"});
             this.cbxType.Location = new System.Drawing.Point(183, 96);
             this.cbxType.Name = "cbxType";
             this.cbxType.Size = new System.Drawing.Size(134, 23);

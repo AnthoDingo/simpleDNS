@@ -7,9 +7,9 @@ using System.Windows.Forms;
 
 namespace simpleDNS
 {
-    partial class AboutBox : Form
+    partial class frmAboutBox : Form
     {
-        public AboutBox()
+        public frmAboutBox()
         {
             InitializeComponent();
             this.Text = String.Format("À propos de {0}", AssemblyTitle);

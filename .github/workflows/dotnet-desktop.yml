@@ -115,4 +115,4 @@ jobs:
         #name: MSIX Package
         #path: ${{ env.Wap_Project_Directory }}\AppPackages
         name: ZIP Package
-        path: ${{ github.workspace }}\bin\${{ matrix.configuration }}\netcoreapp3.1\*
+        path: ${{ github.workspace }}\bin\${{ matrix.configuration }}

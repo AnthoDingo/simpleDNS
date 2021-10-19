@@ -12,8 +12,8 @@
     <PackageProjectUrl>https://github.com/AnthoDingo/simpleDNS</PackageProjectUrl>
     <RepositoryUrl>https://github.com/AnthoDingo/simpleDNS</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <AssemblyVersion>1.0.0.21291</AssemblyVersion>
-    <FileVersion>1.0.0.21291</FileVersion>
+    <AssemblyVersion>1.0.0.21292</AssemblyVersion>
+    <FileVersion>1.0.0.21292</FileVersion>
     <Description>Simple DNS à destination de l'éducation.</Description>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>AnthoDingo.pfx</AssemblyOriginatorKeyFile>

@@ -1,7 +1,7 @@
 ﻿
 namespace simpleDNS
 {
-    partial class mainForm
+    partial class frmMain
     {
         /// <summary>
         ///  Required designer variable.
@@ -166,7 +166,7 @@ namespace simpleDNS
             this.tbxLogs.Name = "tbxLogs";
             this.tbxLogs.ReadOnly = true;
             this.tbxLogs.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tbxLogs.Size = new System.Drawing.Size(673, 70);
+            this.tbxLogs.Size = new System.Drawing.Size(673, 71);
             this.tbxLogs.TabIndex = 0;
             this.tbxLogs.TextChanged += new System.EventHandler(this.tbxLogs_TextChanged);
             // 
@@ -197,7 +197,7 @@ namespace simpleDNS
             this.btnReload.UseVisualStyleBackColor = true;
             this.btnReload.Click += new System.EventHandler(this.btnReload_Click);
             // 
-            // mainForm
+            // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -208,9 +208,9 @@ namespace simpleDNS
             this.Controls.Add(this.menuStripTop);
             this.MainMenuStrip = this.menuStripTop;
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "mainForm";
+            this.Name = "frmMain";
             this.Text = "simpleDNS";
-            this.Shown += new System.EventHandler(this.mainForm_Shown);
+            this.Shown += new System.EventHandler(this.frmMain_Shown);
             this.menuStripTop.ResumeLayout(false);
             this.menuStripTop.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);

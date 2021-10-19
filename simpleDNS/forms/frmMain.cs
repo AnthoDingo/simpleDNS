@@ -4,19 +4,21 @@ using System.IO;
 
 namespace simpleDNS
 {
-    public partial class mainForm : Form
+    public partial class frmMain : Form
     {
         private ZoneManager _zm;
+        private frmAssistant _assistant;
 
-        public mainForm()
+        public frmMain()
         {
             InitializeComponent();
             _zm = new ZoneManager();
+            _assistant = new frmAssistant(this);
             //assistantToolStripMenuItem.Visible = false;
             preStart();
 
         }
-        private void mainForm_Shown(object sender, EventArgs e)
+        private void frmMain_Shown(object sender, EventArgs e)
         {
             Console.SetOut(new ControlWriter(tbxLogs));
         }
@@ -102,14 +104,20 @@ namespace simpleDNS
 
         private void assistantToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmAssistant assistant = new frmAssistant();
-            assistant.Show();
+            //frmAssistant assistant = new frmAssistant(this);
+            //assistant.Show();
+            _assistant.Show();
         }
 
         private void aProposToolStripMenuItem_Click(object sender, EventArgs e)
         {
             frmAboutBox box = new frmAboutBox();
             box.ShowDialog();
+        }
+
+        public void LoadZone(string zone)
+        {
+            tbxMasterFile.Text = zone;
         }
     }
 }

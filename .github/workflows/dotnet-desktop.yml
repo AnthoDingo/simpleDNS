@@ -40,9 +40,9 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, dev ]
 
 jobs:
 
@@ -115,4 +115,4 @@ jobs:
         #name: MSIX Package
         #path: ${{ env.Wap_Project_Directory }}\AppPackages
         name: ZIP Package
-        path: ${{ github.workspace }}\simpleDNS\bin\${{ matrix.configuration }}
+        path: ${{ github.workspace }}

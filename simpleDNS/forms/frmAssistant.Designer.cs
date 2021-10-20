@@ -129,6 +129,7 @@ namespace simpleDNS
             this.cbxType.Name = "cbxType";
             this.cbxType.Size = new System.Drawing.Size(134, 23);
             this.cbxType.TabIndex = 4;
+            this.cbxType.SelectedIndexChanged += new System.EventHandler(this.cbxType_SelectedIndexChanged);
             // 
             // tbxValue
             // 

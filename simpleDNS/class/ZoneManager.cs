@@ -1,24 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
-using DNS.Server;
-using DNS.Client;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
+using DNS.Server;
+using DNS.Client;
+using System.Text.Json;
+using System.Net;
+using System.Net.NetworkInformation;
 
 namespace simpleDNS
 {
     class ZoneManager
     {
         private string _ZoneName;
-        private TimeSpan _TTL = new TimeSpan(3600);
+        private TimeSpan _TTL = new TimeSpan(0, 0, 0,3600);
         private MasterFile _MasterFile;
         private DnsServer _Server;
         private bool _isZoneFile = false;
         private bool _isRunning = false;
 
-        public ZoneManager(){}
+        public ZoneManager() { }
 
         public string ZoneName
         {
@@ -34,15 +36,58 @@ namespace simpleDNS
 
         public bool IsRunning
         {
-            get { return _isRunning;}
+            get { return _isRunning; }
+        }
+
+        private static void Info(string message)
+        {
+            Console.WriteLine("[INF] | {0}", message);
+        }
+        private static void Error(object message)
+        {
+            Console.WriteLine("[ERR] | {0}", (string)message);
+        }
+        private static string BeautifyJson(object _object)
+        {
+            string _json = JsonSerializer.Serialize(_object);
+            return BeautifyJson(_json);
+        }
+        private static string BeautifyJson(string _json)
+        {
+            using JsonDocument document = JsonDocument.Parse(_json);
+            using var stream = new MemoryStream();
+            using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions() { Indented = true });
+            document.WriteTo(writer);
+            writer.Flush();
+            return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        private static IPAddress GetDnsAdress()
+        {
+            NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+            foreach (NetworkInterface networkInterface in networkInterfaces)
+            {
+                if (networkInterface.OperationalStatus == OperationalStatus.Up)
+                {
+                    IPInterfaceProperties ipProperties = networkInterface.GetIPProperties();
+                    IPAddressCollection dnsAddresses = ipProperties.DnsAddresses;
+
+                    foreach (IPAddress dnsAdress in dnsAddresses)
+                    {
+                        return dnsAdress;
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Unable to find DNS Address");
         }
 
         public void LoadFromFile(string Path)
         {
-            Console.WriteLine("{0} : Loading zone from file : {1}", "INFO", Path);
+            Info($"Loading zone from file : {Path}");
             StreamReader reader = new StreamReader(Path);
             LoadFromText(reader.ReadToEnd());
-
         }
 
         public void Save(string ZoneFile, string Path)
@@ -52,33 +97,37 @@ namespace simpleDNS
 
         public void LoadFromText(string text)
         {
-            Console.WriteLine("{0} : Loading zone ...", "INFO");
+            Info("Loading zone ...");
             string[] lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
             string[] origin = LineFormater(lines[0]);
             if (origin[0].Equals("$ORIGIN"))
             {
-                //Console.WriteLine("{0} : Domain {1}", "INFO", origin[1].ToLower());
                 _isZoneFile = true;
                 _ZoneName = origin[1].ToLower();
-                if(!_ZoneName.Substring(_ZoneName.Length - 1).Equals('.'))
+                if (!_ZoneName.Substring(_ZoneName.Length - 1).Equals('.'))
                 {
+                    // temporary disabled
                     //_ZoneName += ".";
                 }
-                Console.WriteLine("{0} : Domain {1}", "INFO", _ZoneName);
+                Info($"Domain {_ZoneName}");
             }
-            string[] ttl = LineFormater(lines[1]);
-            if (ttl[0].Equals("$TTL"))
+            if(lines.Length > 1)
             {
-                TTL = new TimeSpan(Int32.Parse(ttl[1]));
-                Console.WriteLine("{0} : TTL {1}", "INFO", ttl[1]);
+                string[] ttl = LineFormater(lines[1]);
+                if (ttl[0].Equals("$TTL"))
+                {
+                    TTL = new TimeSpan(0, 0, 0, Int32.Parse(ttl[1]));
+                    Info($"TTL {ttl[1]}");
+                }
             }
+            
 
             _MasterFile = new MasterFile(TTL);
 
             foreach (string line in lines)
             {
-                if(line.Length == 0)
+                if (line.Length == 0)
                 {
                     continue;
                 }
@@ -99,14 +148,18 @@ namespace simpleDNS
                         case "CNAME":
                             AddCanonicalNameResourceRecord(values[0], values[3]);
                             break;
+                        case "NS":
+                            AddNameServerResourceRecord(values[0], values[3]);
+                            break;
                     }
                 }
-                
+
             }
         }
 
         public void Start()
         {
+            //_Server = new DnsServer(_MasterFile, GetDnsAdress());
             _Server = new DnsServer(_MasterFile);
             MainAsync(_Server);
             _isRunning = true;
@@ -114,10 +167,16 @@ namespace simpleDNS
 
         public void Stop()
         {
-            Console.WriteLine("{0} : Stopping server ...", "INFO");
-            _Server.Dispose();
-            _isRunning = false;
-            Console.WriteLine("{0} : Server stopped.", "INFO");
+            Info("Stopping server ...");
+            try
+            {
+                _Server.Dispose();
+                _isRunning = false;
+                Info("Server stopped.");
+            } catch(Exception e)
+            {
+                Error(e.Message);
+            }
 
         }
 
@@ -130,22 +189,23 @@ namespace simpleDNS
         private async static Task MainAsync(DnsServer server)
         {
 
-            Console.WriteLine("{0} : Starting DNS ...", "INFO");
+            Info("Starting DNS ...");
 
             server.Responded += (sender, e) =>
             {
-                Console.WriteLine("{0} : {1}", "REQUEST", e.Request);
-                Console.WriteLine("{0} : {1}", "ANSWER", e.Response);
+                Console.WriteLine($"[REM] | {e.Remote.Address}:{e.Remote.Port}");
+                Console.WriteLine($"[REQ] | {BeautifyJson(e.Request)}");
+                Console.WriteLine($"[ANS] | {BeautifyJson(e.Response)}");
             };
-            server.Listening += (sender, e) => Console.WriteLine("{0} : Listening ...", "INFO");
+            server.Listening += (sender, e) => Info("Listening ...");
             server.Errored += (sender, e) =>
             {
-                Console.WriteLine("{0} : {1}", "INFO", e.Exception);
+                Error(e.Exception.Message);
                 ResponseException responseError = e.Exception as ResponseException;
-                if (responseError != null) Console.WriteLine(responseError.Response);
+                if (responseError != null) Error(BeautifyJson(responseError.Response));
             };
 
-            Console.WriteLine("{0} : Server DNS started", "INFO");
+            Info("Server DNS started.");
             await server.Listen().ConfigureAwait(false);
         }
 
@@ -173,12 +233,12 @@ namespace simpleDNS
         {
             try
             {
+                Info($"Adding A Record : {getDomain(domain)} => {ip}");
                 _MasterFile.AddIPAddressResourceRecord(getDomain(domain), ip);
-                Console.WriteLine("{0} : Adding A Record : {1} => {2}", "INFO", getDomain(domain), ip);
             }
             catch (InvalidCastException e)
             {
-                Console.WriteLine("{0} : {1}", "ERROR", e);
+                Error(e);
             }
 
         }
@@ -187,12 +247,26 @@ namespace simpleDNS
         {
             try
             {
+                Info($"Adding CNAME Record : {getDomain(domain)} => {cname}");
                 _MasterFile.AddCanonicalNameResourceRecord(getDomain(domain), cname);
-                Console.WriteLine("{0} : Adding CNAME Record : {1} => {2}", "INFO", getDomain(domain), cname);
+
             }
             catch (InvalidCastException e)
             {
-                Console.WriteLine("{0} : {1}", "ERROR", e);
+                Error(e);
+            }
+        }
+
+        public void AddNameServerResourceRecord(string domain, string nsDomain)
+        {
+            try
+            {
+                _MasterFile.AddNameServerResourceRecord(getDomain(domain), nsDomain);
+                Info($"Adding NS Record : {getDomain(domain)} => {nsDomain}");
+            }
+            catch (InvalidCastException e)
+            {
+                Error(e);
             }
         }
     }

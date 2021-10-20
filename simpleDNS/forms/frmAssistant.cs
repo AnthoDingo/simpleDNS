@@ -26,7 +26,7 @@ namespace simpleDNS
     public partial class frmAssistant : Form
     {
         private frmMain _parent;
-        private string[] _types = new string[2] { "A", "CNAME" };
+        private string[] _types = new string[3] { "A", "CNAME", "NS" };
         private List<Entry> _entries = new List<Entry>();
 
         public frmAssistant(frmMain parent)
@@ -53,7 +53,12 @@ namespace simpleDNS
                 tbxResult.Text += $"$TTL\t{nudTTL.Value}\r\n";
             }
 
-            foreach(Entry entry in _entries)
+            foreach (Entry entry in _entries.FindAll(x => x.type.Equals("NS")))
+            {
+                tbxResult.Text += entry.ToString();
+            }
+
+            foreach(Entry entry in _entries.FindAll(x => !x.type.Equals("NS")))
             {
                 tbxResult.Text += entry.ToString();
             }
@@ -75,6 +80,24 @@ namespace simpleDNS
         {
             ZoneFormater();
         }
+
+        private void cbxType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbxType.GetItemText(cbxType.SelectedItem).Equals("NS"))
+            {
+                tbxSubDomain.Text = "@";
+                tbxSubDomain.Enabled = false;
+            }
+            else
+            {
+                tbxSubDomain.Enabled = true;
+                if (tbxSubDomain.Text.Equals("@"))
+                {
+                    tbxSubDomain.Text = null;
+                }
+            }
+        }
+
         private void btnAdd_Click(object sender, EventArgs e)
         {
             if(String.IsNullOrEmpty(tbxSubDomain.Text) || string.IsNullOrEmpty(tbxValue.Text))

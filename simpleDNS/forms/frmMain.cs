@@ -36,6 +36,11 @@ namespace simpleDNS
             switch (_zm.IsRunning)
             {
                 case false:
+                    if(String.IsNullOrEmpty(tbxMasterFile.Text))
+                    {
+                        Console.WriteLine("Zone cannot be empty");
+                        return;
+                    }
                     tbxLogs.Text = null;
                     _zm.LoadFromText(tbxMasterFile.Text);
                     _zm.Start();
